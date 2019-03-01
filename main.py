@@ -4,7 +4,6 @@ import os
 
 from dotenv import load_dotenv
 
-from utils.common import create_directory, read_text_from_file
 from utils.google_services import (
     initialize_google_drive_service,
     initialize_google_spreadsheet_service,
@@ -89,13 +88,13 @@ def process_spreadsheet(spreadsheet_id):
 
 
 def process_row_from_dataframe(
-    row,
-    spreadsheet_handler,
-    drive_handler,
-    social_platform_post_config,
-    telegram_social,
-    vk_social,
-    facebook_social,
+        row,
+        spreadsheet_handler,
+        drive_handler,
+        social_platform_post_config,
+        telegram_social,
+        vk_social,
+        facebook_social,
 ):
     img_file_path = drive_handler.load_file_from_google_drive_to_disk(
         row['image_id'], img_directory
@@ -104,7 +103,10 @@ def process_row_from_dataframe(
     article_file_path = drive_handler.load_file_from_google_drive_to_disk(
         row['article_id'], article_directory, 'text/plain'
     )
-    article_text = read_text_from_file(article_file_path)
+
+    with open(article_file_path, 'r') as file:
+        article_text = file.read()
+
     if row['telegram']:
         telegram_social.post_with_image_in_social_media(
             text=article_text, image_path=img_file_path, **social_platform_post_config
@@ -121,12 +123,16 @@ def process_row_from_dataframe(
 
 
 if __name__ == '__main__':
-    seconds_to_sleep = 10
     load_dotenv()
 
-    img_directory = create_directory(os.path.join('static', 'img'))
-    article_directory = create_directory(os.path.join('static', 'article'))
+    img_directory = os.path.join('static', 'img')
+    os.makedirs(img_directory, exist_ok=True)
+
+    article_directory = os.path.join('static', 'article')
+    os.makedirs(article_directory, exist_ok=True)
+
     spreadsheet_id = os.getenv('SPREADSHEET_ID')
+    seconds_to_sleep = int(os.getenv('SECONDS_TO_SLEEP'))
 
     while True:
         process_spreadsheet(spreadsheet_id)
