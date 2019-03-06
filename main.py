@@ -15,14 +15,20 @@ from utils.google_services import (
 
 from utils.spreadsheet_handler import parse_spreadsheet, mark_row_as_published
 from utils.drive_handler import load_file_from_google_drive_to_disk
-from utils.social import post_with_image_in_social_media
+from utils.social import (
+    telegram_post_with_image,
+    vk_post_with_image,
+    facebook_post_with_image,
+    initialize_telegram_bot,
+    initialize_vk_api,
+)
 
 
 def process_row(
-    row: Series,
-    social_platform_config: dict,
-    spreadsheet_service: Resource,
-    drive_service: GoogleDrive,
+        row: Series,
+        social_platform_config: dict,
+        spreadsheet_service: Resource,
+        drive_service: GoogleDrive,
 ):
     img_file_path = load_file_from_google_drive_to_disk(
         drive_service, row['image_id'], img_directory
@@ -47,27 +53,28 @@ def process_row(
     if not need_to_publish_row:
         return
 
-    if row['facebook']:
-        post_with_image_in_social_media(
-            provider='facebook',
-            text=article_text,
-            image_path=img_file_path,
-            **social_platform_config
-        )
+    telegram_bot = initialize_telegram_bot(social_platform_config['telegram_token'])
+    vk_api_, vk_upload_api_ = initialize_vk_api(
+        social_platform_config['vk_login'],
+        social_platform_config['vk_app_id'],
+        social_platform_config['vk_token'],
+    )
+
     if row['telegram']:
-        post_with_image_in_social_media(
-            provider='telegram',
-            text=article_text,
-            image_path=img_file_path,
-            **social_platform_config
+        telegram_post_with_image(
+            telegram_bot, article_text, img_file_path, **social_platform_config
         )
     if row['vk']:
-        post_with_image_in_social_media(
-            provider='vk',
-            text=article_text,
-            image_path=img_file_path,
+        vk_post_with_image(
+            vk_api_,
+            vk_upload_api_,
+            article_text,
+            img_file_path,
             **social_platform_config
         )
+
+    if row['facebook']:
+        facebook_post_with_image(article_text, img_file_path, **social_platform_config)
 
     mark_row_as_published(spreadsheet_service, spreadsheet_id, row['target_column'])
 
@@ -103,7 +110,6 @@ def process_spreadsheet(spreadsheet_id: str):
     df = parse_spreadsheet(spreadsheet_service, spreadsheet_id)
     for index, row in df.iterrows():
         process_row(row, social_platform_config, spreadsheet_service, drive_service)
-        break
 
 
 if __name__ == '__main__':

@@ -12,27 +12,26 @@ class SocialException(Exception):
     """
 
 
-def post_with_image_in_social_media(provider, text, image_path, **kwargs):
-    if provider == 'telegram':
-        telegram_post_with_image(text, image_path, **kwargs)
-    elif provider == 'vk':
-        vk_post_with_image(text, image_path, **kwargs)
-    elif provider == 'facebook':
-        facebook_post_with_image(text, image_path, **kwargs)
-    else:
-        raise SocialException('Social platform has not been implemented yet!')
-
-
-def telegram_post_with_image(
-    text, image_path, telegram_token, telegram_chat_id, **kwargs
-):
+def initialize_telegram_bot(telegram_token):
     try:
         bot = telegram.Bot(token=telegram_token)
     except TelegramError as e:
         raise SocialException(
             f'An error has occurred during connection to telegram: {e}'
         )
+    return bot
 
+
+def initialize_vk_api(vk_login, vk_app_id, vk_token):
+    _vk_session = vk_api.VkApi(login=vk_login, app_id=vk_app_id, token=vk_token)
+    _vk_api = _vk_session.get_api()
+    _vk_upload_api = vk_api.VkUpload(_vk_session)
+    return _vk_api, _vk_upload_api
+
+
+def telegram_post_with_image(
+        bot, text, image_path, telegram_chat_id, **kwargs
+):
     try:
         bot.send_message(chat_id=telegram_chat_id, text=text)
     except TelegramError as e:
@@ -45,14 +44,10 @@ def telegram_post_with_image(
 
 
 def vk_post_with_image(
-    text, image_path, vk_login, vk_app_id, vk_token, vk_album_id, vk_group_id, **kwargs
+        vk_api_, vk_upload_api_, text, image_path, vk_album_id, vk_group_id, **kwargs
 ):
-    _vk_session = vk_api.VkApi(login=vk_login, app_id=vk_app_id, token=vk_token)
-    _vk_api = _vk_session.get_api()
-    _vk_upload_api = vk_api.VkUpload(_vk_session)
-
     try:
-        photo = _vk_upload_api.photo(
+        photo = vk_upload_api_.photo(
             image_path, album_id=vk_album_id, group_id=vk_group_id
         )
     except VkApiError as e:
@@ -63,7 +58,7 @@ def vk_post_with_image(
     try:
         photo_id = photo[0]['id']
         photo_path = 'photo-{}_{}'.format(vk_group_id, photo_id)
-        _vk_api.wall.post(
+        vk_api_.wall.post(
             owner_id=f'-{vk_group_id}', message=text, attachments=[photo_path]
         )
     except VkApiError as e:
@@ -73,7 +68,7 @@ def vk_post_with_image(
 
 
 def facebook_post_with_image(
-    text, image_path, facebook_api_token, facebook_group_id, **kwargs
+        text, image_path, facebook_api_token, facebook_group_id, **kwargs
 ):
     facebook_page = f'https://graph.facebook.com/v3.2/{facebook_group_id}/photos/'
 
