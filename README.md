@@ -4,7 +4,7 @@
 ## Requirements
 
 This project is built in docker container.
-Learn more about docker at [docker](https://docs.docker.com/) and[docker-compose](https://docs.docker.com/compose/) 
+Learn more about docker at [docker](https://docs.docker.com/) and [docker-compose](https://docs.docker.com/compose/) 
 ## Usage
 
 Program will create posts with image and text taken from [Google Sheets](https://www.google.com/sheets/about/)
