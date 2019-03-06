@@ -3,13 +3,8 @@
 
 ## Requirements
 
-Python >= 3.5 required.  
-Install dependencies with 
-```bash
-pip install -r requirements.txt
-```
-For better interaction is recommended to use [virtualenv](https://github.com/pypa/virtualenv).
-
+This project is built in docker container.
+Learn more about docker at [docker](https://docs.docker.com/) and[docker-compose](https://docs.docker.com/compose/) 
 ## Usage
 
 Program will create posts with image and text taken from [Google Sheets](https://www.google.com/sheets/about/)
@@ -47,7 +42,8 @@ For **facebook**:
 
 Run!
 ```bash
-python main.py
+docker-compose -f docker-compose-dev.yml build
+docker-compose -f docker-compose-dev.yml up
 ```
 
 

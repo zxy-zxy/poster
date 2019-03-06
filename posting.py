@@ -1,8 +1,6 @@
 import os
-import time
 import datetime
 
-from dotenv import load_dotenv
 from pandas import Series
 
 from pydrive.drive import GoogleDrive
@@ -22,14 +20,17 @@ from utils.social import (
     initialize_telegram_bot,
     initialize_vk_api,
 )
+from settings import (
+    service_account_credentials,
+    google_scope,
+    social_platform_config,
+    img_directory,
+    article_directory,
+    spreadsheet_id,
+)
 
 
-def process_row(
-        row: Series,
-        social_platform_config: dict,
-        spreadsheet_service: Resource,
-        drive_service: GoogleDrive,
-):
+def process_row(row: Series, spreadsheet_service: Resource, drive_service: GoogleDrive):
     img_file_path = load_file_from_google_drive_to_disk(
         drive_service, row['image_id'], img_directory
     )
@@ -79,14 +80,7 @@ def process_row(
     mark_row_as_published(spreadsheet_service, spreadsheet_id, row['target_column'])
 
 
-def process_spreadsheet(spreadsheet_id: str):
-    google_scope = [
-        'https://www.googleapis.com/auth/spreadsheets',
-        'https://www.googleapis.com/auth/drive',
-    ]
-
-    service_account_credentials = os.getenv('GOOGLE_SERVICE_ACCOUNT_CREDENTIALS')
-
+def process_spreadsheet():
     spreadsheet_service = initialize_google_spreadsheet_service(
         google_scope, service_account_credentials
     )
@@ -95,35 +89,10 @@ def process_spreadsheet(spreadsheet_id: str):
         google_scope, service_account_credentials
     )
 
-    social_platform_config = {
-        'vk_login': os.getenv('VK_LOGIN'),
-        'vk_app_id': os.getenv('VK_APP_ID'),
-        'vk_token': os.getenv('VK_TOKEN'),
-        'telegram_token': os.getenv('TELEGRAM_TOKEN'),
-        'facebook_api_token': os.getenv('FACEBOOK_TOKEN'),
-        'telegram_chat_id': os.getenv('TELEGRAM_CHAT_ID'),
-        'vk_group_id': os.getenv('VK_GROUP_ID'),
-        'vk_album_id': os.getenv('VK_ALBUM_ID'),
-        'facebook_group_id': os.getenv('FACEBOOK_GROUP_ID'),
-    }
-
     df = parse_spreadsheet(spreadsheet_service, spreadsheet_id)
     for index, row in df.iterrows():
-        process_row(row, social_platform_config, spreadsheet_service, drive_service)
+        process_row(row, spreadsheet_service, drive_service)
 
 
-if __name__ == '__main__':
-    load_dotenv()
-
-    img_directory = os.path.join('static', 'img')
-    os.makedirs(img_directory, exist_ok=True)
-
-    article_directory = os.path.join('static', 'article')
-    os.makedirs(article_directory, exist_ok=True)
-
-    spreadsheet_id = os.getenv('SPREADSHEET_ID')
-    seconds_to_sleep = int(os.getenv('SECONDS_TO_SLEEP'))
-
-    while True:
-        process_spreadsheet(spreadsheet_id)
-        time.sleep(seconds_to_sleep)
+def process_posting():
+    process_spreadsheet()

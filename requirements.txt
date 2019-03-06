@@ -8,3 +8,8 @@ google-auth-oauthlib==0.2.0
 oauth2client==4.1.3
 PyDrive==1.3.1
 pandas==0.24.1
+celery==4.2.1
+redis==3.2.0
+urlextract==0.9
+
+
