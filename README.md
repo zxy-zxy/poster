@@ -20,10 +20,10 @@ and [Google Drive](https://www.google.com/drive/) API for this project.
 Then create [Google Service Account](https://cloud.google.com/iam/docs/understanding-service-accounts) for your Google project
 and save credentials in directory with code file. Provide name of file with credentials in .env file. 
 
-Create .env file and store your account credentials for [vk](https://vk.com),
+Create *environment.env* file and store your account credentials for [vk](https://vk.com),
 [telegram](https://telegram.org/) and [facebook](https://www.facebook.com/).
 
-Example of .env file provided.
+Example of environment.env (as *.env.example*) file provided.
 
 For **VK** it's required to provide:
 * Vk login

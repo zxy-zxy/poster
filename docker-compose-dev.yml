@@ -10,6 +10,8 @@ services:
     command: sh -c "celery -A periodic worker -l info"
     volumes:
       - .:/code
+    env_file: &envfile
+      - environment.env
     depends_on:
       - redis
 

@@ -1,9 +1,5 @@
 import os
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 img_directory = os.path.join('static', 'img')
 os.makedirs(img_directory, exist_ok=True)
 
