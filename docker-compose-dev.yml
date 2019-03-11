@@ -2,23 +2,10 @@ version: '3.6'
 
 services:
 
-  redis:
-    image: "redis:alpine"
-
-  celery:
+  poster:
     build: .
-    command: sh -c "celery -A periodic worker -l info"
+    command: sh -c "python posting.py"
     volumes:
       - .:/code
     env_file: &envfile
       - environment.env
-    depends_on:
-      - redis
-
-  celery-beat:
-    build: .
-    command: sh -c "celery -A periodic beat -l info"
-    volumes:
-      - .:/code
-    depends_on:
-      - redis

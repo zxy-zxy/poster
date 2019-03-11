@@ -1,3 +1,4 @@
+import time
 import datetime
 
 from pandas import Series
@@ -26,6 +27,7 @@ from settings import (
     img_directory,
     article_directory,
     spreadsheet_id,
+    timeout_sec,
 )
 
 
@@ -93,5 +95,7 @@ def process_spreadsheet():
         process_row(row, spreadsheet_service, drive_service)
 
 
-def process_posting():
-    process_spreadsheet()
+if __name__ == '__main__':
+    while True:
+        time.sleep(timeout_sec)
+        process_spreadsheet()

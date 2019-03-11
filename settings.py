@@ -26,3 +26,5 @@ social_platform_config = {
 }
 
 spreadsheet_id = os.getenv('SPREADSHEET_ID')
+
+timeout_sec = os.getenv('TIMEOUT_SEC')
